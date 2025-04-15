@@ -114,23 +114,25 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code>rdwd is up to date, compared to github.com/brry/rdwd. Version 1.8.23 (2025-03-27)</code></pre>
 </div>
 </div>
+<p>download recent weather data using <a href="https://bookdown.org/brry/rdwd/">rdwd</a></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rdwd)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>link <span class="ot">&lt;-</span> <span class="fu">selectDWD</span>(<span class="st">"Potsdam"</span>, <span class="at">res=</span><span class="st">"daily"</span>, <span class="at">var=</span><span class="st">"kl"</span>, <span class="at">per=</span><span class="st">"recent"</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>clim <span class="ot">&lt;-</span> <span class="fu">dataDWD</span>(link, <span class="at">varnames=</span><span class="cn">TRUE</span>, <span class="at">force=</span><span class="dv">24</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
-<section id="running-code" class="level2">
-<h2 class="anchored" data-anchor-id="running-code">Running Code</h2>
-<p>When you click the <strong>Render</strong> button a document will be generated that includes both content and the output of embedded code. You can embed code like this:</p>
+<section id="visualise-recent-temperature" class="level2">
+<h2 class="anchored" data-anchor-id="visualise-recent-temperature">visualise recent temperature</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="sc">+</span> <span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 2</code></pre>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotDWD</span>(clim, <span class="st">"TMK.Lufttemperatur"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="weather_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
 </div>
 </div>
-<p>You can add options to executable code like this</p>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 4</code></pre>
 </div>
-</div>
-<p>The <code>echo: false</code> option disables the printing of code (only output is displayed).</p>
 </section>
 
 </main>

@@ -16,8 +16,15 @@ rdwd::updateRdwd()
 
 download recent weather data using [rdwd](https://bookdown.org/brry/rdwd/)
 ```{r}
+#| message: false
 library(rdwd)
-selectDWD("Potsdam")
+link <- selectDWD("Potsdam", res="daily", var="kl", per="recent")
+clim <- dataDWD(link, varnames=TRUE, force=24)
 ```
 
+## visualise recent temperature
+
+```{r}
+plotDWD(clim, "TMK.Lufttemperatur")
+```
 
