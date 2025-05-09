@@ -1,10 +1,10 @@
 # recent weather
 Berry Boessenkool;
-2025-05-09, 07:05
+2025-05-09, 07:08
 
 This is a git demo in the course
 [DS4W](https://open.hpi.de/courses/hpi-dh-wearables2025).  
-This repo is also used for the lesson on an R data analysis pipeline.
+This repo is also used for the lesson on data analysis pipelines with R.
 
 ## Get Data
 
