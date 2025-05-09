@@ -1,17 +1,22 @@
 ---
 title: "recent weather"
-author: "Berry"
+author: "Berry Boessenkool;"
+date: now
+date-format: YYYY-MM-DD, HH:mm
 format:
-    html: 
-       embed-resources: true
+    gfm: 
+       embed-resources: false
 editor: visual
 ---
+
+This is a git demo in the course [DS4W](https://open.hpi.de/courses/hpi-dh-wearables2025).  
+This repo is also used for the lesson on an R data analysis pipeline.
 
 ## Get Data
 
 make sure we have all packages:
 
-```{r}
+```{r, packages}
 if(!requireNamespace("rdwd", quietly=TRUE))
 	install.packages("rdwd")
 rdwd::updateRdwd()
@@ -19,7 +24,7 @@ rdwd::updateRdwd()
 
 download recent weather data using [rdwd](https://bookdown.org/brry/rdwd/)
 
-```{r}
+```{r, get_weather_data}
 #| message: false
 library(rdwd)
 link <- selectDWD("Potsdam", res="daily", var="kl", per="recent")
@@ -28,6 +33,6 @@ clim <- dataDWD(link, varnames=TRUE, force=24)
 
 ## visualise recent temperature
 
-```{r}
+```{r, plot_clim}
 plotDWD(clim, "TMK.Lufttemperatur")
 ```
