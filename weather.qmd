@@ -1,13 +1,16 @@
 ---
 title: "recent weather"
 author: "Berry"
-format: html
+format:
+    html: 
+       embed-resources: true
 editor: visual
 ---
 
 ## Get Data
 
 make sure we have all packages:
+
 ```{r}
 if(!requireNamespace("rdwd", quietly=TRUE))
 	install.packages("rdwd")
@@ -15,6 +18,7 @@ rdwd::updateRdwd()
 ```
 
 download recent weather data using [rdwd](https://bookdown.org/brry/rdwd/)
+
 ```{r}
 #| message: false
 library(rdwd)
@@ -27,4 +31,3 @@ clim <- dataDWD(link, varnames=TRUE, force=24)
 ```{r}
 plotDWD(clim, "TMK.Lufttemperatur")
 ```
-
