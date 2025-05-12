@@ -4,23 +4,22 @@ author: "Berry Boessenkool"
 format:
     html: 
        embed-resources: true
-editor: visual
+editor: source
 ---
 
 This builds on the concepts from my [short course](https://github.com/brry/hour), look at that before this session!
 
 ## data info
-Percentage of infants that are vaccinated per year and country.  
-Data source: UNICEF Immunization coverage by antigen (country, regional, and global trends), see   <https://data.unicef.org/resources/dataset/immunization/> and the
-[exact url](https://data.unicef.org/resources/data_explorer/unicef_f/?ag=UNICEF&df=GLOBAL_DATAFLOW&ver=1.0&dq=.IM_BCG+IMMUNISATION+IM_DTP1+IM_DTP3+IM_HEPB3+IM_HEPBB+IM_HIB3+IM_IPV1+IM_MCV1+IM_MCV2+IM_PCV3+IM_POL3+IM_RCV1+IM_ROTAC+IM_YFV..&startPeriod=2010&endPeriod=2020&lastnobservations=1)
+
+Percentage of infants that are vaccinated per year and country. Data source: UNICEF Immunization coverage by antigen (country, regional, and global trends), see <https://data.unicef.org/resources/dataset/immunization/> and the [exact url](https://data.unicef.org/resources/data_explorer/unicef_f/?ag=UNICEF&df=GLOBAL_DATAFLOW&ver=1.0&dq=.IM_BCG+IMMUNISATION+IM_DTP1+IM_DTP3+IM_HEPB3+IM_HEPBB+IM_HIB3+IM_IPV1+IM_MCV1+IM_MCV2+IM_PCV3+IM_POL3+IM_RCV1+IM_ROTAC+IM_YFV..&startPeriod=2010&endPeriod=2020&lastnobservations=1)
 
 ## read data
 
-- use the [zip file](vaccines.zip) containing txt files
-- conditionally (if not already done), unzip it to a folder with a good name
-- using `lapply` (or the `purr` equivalent), read the files with actual data
-- optionally, convert the list to an array
-(complicated, so code is provided:)
+-   use the [zip file](vaccines.zip) containing txt files
+-   conditionally (if not already done), unzip it to a folder with a good name
+-   using `lapply` (or the `purr` equivalent), read the files with actual data
+-   optionally, convert the list to an array (complicated, so code is provided:)
+
 ```{r, data_to_array, eval=FALSE}
 countries <- read.delim("vaccfiles/countrycodes.txt")[,1] # iso3 countrycodes
 arrayvacc <- lapply(vaccines, function(x) 
@@ -36,26 +35,28 @@ dimnames(arrayvacc)[[1]] <- countries
 rm(countries)
 ```
 
-
 ## check data
-- Perform EDA (exploratory data analysis).
-- Across all vaccines and countries, how many datapoints are avialable per year?
-- For the year with most datapoints, visualize the distributions for each vaccine (histograms in a multipanel plot). Which vaccine has the largest variation among countries?
+
+-   Perform EDA (exploratory data analysis).
+-   Across all vaccines and countries, how many datapoints are avialable per year?
+-   For the year with most datapoints, visualize the distributions for each vaccine (histograms in a multipanel plot). Which vaccine has the largest variation among countries?
 
 ## sanitize data
-- One dataset has an anomaly in the last year (2022). 
-- What country is affected and does that happen for several vaccines?
-- How could you fix the issue?
+
+-   One dataset has an anomaly in the last year (2022).
+-   What country is affected and does that happen for several vaccines?
+-   How could you fix the issue?
 
 ## visualize data
 
 Visualize the temporal development of vaccinated infants for each vaccine. Consider how to display the individual countries:
 
-- show aggregate only
-- spaghetti plot with each country as a line
-- boxplots
-- proportion of well-vaccinated countries
+-   show aggregate only
+-   spaghetti plot with each country as a line
+-   boxplots
+-   proportion of well-vaccinated countries
 
 ## pipeline
-- how should you structure your code?
 
+-   How should you structure your code?
+-   Where can you deploy your code?
