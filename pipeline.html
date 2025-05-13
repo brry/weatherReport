@@ -3118,22 +3118,33 @@ vertical-align: -.125em;
 <ul>
 <li>use the <a href="vaccines.zip">zip file</a> containing txt files</li>
 <li>conditionally (if not already done), unzip it to a folder with a good name</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">dir.exists</span>(<span class="st">&quot;vaccines&quot;</span>)) <span class="fu">unzip</span>(<span class="st">&quot;vaccines.zip&quot;</span>, <span class="at">exdir=</span><span class="st">&quot;vaccines&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
 <li>using <code>lapply</code> (or the <code>purr</code> equivalent), read the files with actual data</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>filenames <span class="ot">&lt;-</span> <span class="fu">dir</span>(<span class="st">&quot;vaccines&quot;</span>, <span class="at">pattern=</span><span class="st">&quot;^vacc&quot;</span>, <span class="at">full.names=</span><span class="cn">TRUE</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>vaccines <span class="ot">&lt;-</span> <span class="fu">lapply</span>(filenames, read.table, <span class="at">header=</span><span class="cn">TRUE</span>, <span class="at">check.names=</span><span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
 <li>optionally, convert the list to an array (complicated, so code is provided:)</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>countries <span class="ot">&lt;-</span> <span class="fu">read.delim</span>(<span class="st">&quot;vaccfiles/countrycodes.txt&quot;</span>)[,<span class="dv">1</span>] <span class="co"># iso3 countrycodes</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>arrayvacc <span class="ot">&lt;-</span> <span class="fu">lapply</span>(vaccines, <span class="cf">function</span>(x) </span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a> {</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a> <span class="co"># dimensions must be expanded to include all countries in all datasets:</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a> y <span class="ot">&lt;-</span> <span class="fu">merge</span>(x, <span class="fu">data.frame</span>(<span class="at">iso3=</span>countries), <span class="at">all=</span><span class="cn">TRUE</span>)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a> y<span class="sc">$</span>iso3 <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a> y</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a> })</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>arrayvacc <span class="ot">&lt;-</span> berryFunctions<span class="sc">::</span><span class="fu">l2array</span>(arrayvacc)</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(<span class="fu">dimnames</span>(arrayvacc)) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;country&quot;</span>, <span class="st">&quot;year&quot;</span>, <span class="st">&quot;vaccine&quot;</span>)</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">dimnames</span>(arrayvacc)[[<span class="dv">1</span>]] <span class="ot">&lt;-</span> countries</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(countries)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>countries <span class="ot">&lt;-</span> <span class="fu">read.delim</span>(<span class="st">&quot;vaccines/countrycodes.txt&quot;</span>)[,<span class="dv">1</span>] <span class="co"># iso3 countrycodes</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>arrayvacc <span class="ot">&lt;-</span> <span class="fu">lapply</span>(vaccines, <span class="cf">function</span>(x) </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a> {</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a> <span class="co"># dimensions must be expanded to include all countries in all datasets:</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a> y <span class="ot">&lt;-</span> <span class="fu">merge</span>(x, <span class="fu">data.frame</span>(<span class="at">iso3=</span>countries), <span class="at">all=</span><span class="cn">TRUE</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a> y<span class="sc">$</span>iso3 <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a> y</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a> })</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>arrayvacc <span class="ot">&lt;-</span> berryFunctions<span class="sc">::</span><span class="fu">l2array</span>(arrayvacc)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(<span class="fu">dimnames</span>(arrayvacc)) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;country&quot;</span>, <span class="st">&quot;year&quot;</span>, <span class="st">&quot;vaccine&quot;</span>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="fu">dimnames</span>(arrayvacc)[[<span class="dv">1</span>]] <span class="ot">&lt;-</span> countries</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(countries)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="check-data" class="level2">

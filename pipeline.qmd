@@ -17,11 +17,20 @@ Percentage of infants that are vaccinated per year and country. Data source: UNI
 
 -   use the [zip file](vaccines.zip) containing txt files
 -   conditionally (if not already done), unzip it to a folder with a good name
+```{r, unzip_file}
+if(!dir.exists("vaccines")) unzip("vaccines.zip", exdir="vaccines")
+```
+
 -   using `lapply` (or the `purr` equivalent), read the files with actual data
+```{r, read_data}
+filenames <- dir("vaccines", pattern="^vacc", full.names=TRUE)
+vaccines <- lapply(filenames, read.table, header=TRUE, check.names=FALSE)
+```
+
 -   optionally, convert the list to an array (complicated, so code is provided:)
 
-```{r, data_to_array, eval=FALSE}
-countries <- read.delim("vaccfiles/countrycodes.txt")[,1] # iso3 countrycodes
+```{r, data_to_array, eval=TRUE}
+countries <- read.delim("vaccines/countrycodes.txt")[,1] # iso3 countrycodes
 arrayvacc <- lapply(vaccines, function(x) 
  {
  # dimensions must be expanded to include all countries in all datasets:
