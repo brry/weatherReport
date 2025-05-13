@@ -47,17 +47,34 @@ arrayvacc <- berryFunctions::l2array(arrayvacc)
 names(dimnames(arrayvacc)) <- c("country", "year", "vaccine")
 dimnames(arrayvacc)[[1]] <- countries
 rm(countries)
+dimnames(arrayvacc)[[3]] <- sub(".txt", "", sub("vaccines/vacc_", "", filenames))
 ```
 
 ## check data
 
 -   Perform EDA (exploratory data analysis).
-```{r}
+```{r, eda, eval=FALSE}
 str(arrayvacc)
+hist(arrayvacc[,,"BCG"])
+hists <- sapply(dimnames(arrayvacc)[[3]], function(n)
+	hist(arrayvacc[,,n], main=n, breaks=seq(0,100,5)))
 ```
 
 -   Across all vaccines and countries, how many datapoints are avialable per year?
+```{r, eda_ndatapoints}
+notNA <- sapply(dimnames(arrayvacc)[[2]], function(y)
+	sum(!is.na(arrayvacc[,y,])))
+plot(as.numeric(names(notNA)), notNA)
+```
+
 -   For the year with most datapoints, visualize the distributions for each vaccine (histograms in a multipanel plot). Which vaccine has the largest variation among countries?
+```{r}
+View(arrayvacc[,"2022",])
+par(mfrow=c(4,4), mar=c(2,2,1.5,0.1))
+hists <- sapply(dimnames(arrayvacc)[[3]], function(v) hist(arrayvacc[,"2022",v], main=v, breaks=seq(0,100,5), col="salmon"))
+```
+
+
 
 ## sanitize data
 
