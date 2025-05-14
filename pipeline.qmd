@@ -79,14 +79,36 @@ hists <- sapply(dimnames(arrayvacc)[[3]], function(v) hist(arrayvacc[,"2022",v],
 ## sanitize data
 
 -   One dataset has an anomaly in the last year (2022).
+```{r, anomaly}
+View(arrayvacc[,,"BCG"])
+View(arrayvacc["PRK",,])
+```
+
 -   What country is affected and does that happen for several vaccines?
 -   How could you fix the issue?
+
+Set PRK (North Korea) 2022 values that are zero to NA  
+set alle PRK 2022 to NA  
+ignore PRK completely (aggressive)
+
+```{r, deal_with_PRK}
+arrayvacc["PRK","2022",] <- NA
+arrayvacc <- arrayvacc[-which(rownames(arrayvacc)=="PRK"),,]
+```
+
 
 ## visualize data
 
 Visualize the temporal development of vaccinated infants for each vaccine. Consider how to display the individual countries:
 
 -   show aggregate only
+```{r, vis_aggregate}
+plot(1980:2022, apply(arrayvacc, 2, mean, na.rm=TRUE), type="l", lwd=2, ylim=c(40,100), las=1)
+meanspervac <- apply(arrayvacc, 3, colMeans, na.rm=T)
+for(i in 1:14) lines(1980:2022, meanspervac[,i], col="grey")
+```
+
+
 -   spaghetti plot with each country as a line
 -   boxplots
 -   proportion of well-vaccinated countries
@@ -94,4 +116,16 @@ Visualize the temporal development of vaccinated infants for each vaccine. Consi
 ## pipeline
 
 -   How should you structure your code?
+codefile structuring as in that lesson
+unified approach
+think ahead
+use good software approaches / principles
+
 -   Where can you deploy your code?
+github readme (from qmd)
+github.io
+shinyapps.io
+
+
+
+
