@@ -6,8 +6,8 @@ SaveWorkspace: Default
 AlwaysSaveHistory: Default
 
 EnableCodeIndexing: Yes
-UseSpacesForTab: No
-NumSpacesForTab: 2
+UseSpacesForTab: Yes
+NumSpacesForTab: 1
 Encoding: UTF-8
 
 RnwWeave: knitr

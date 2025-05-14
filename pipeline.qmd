@@ -5,6 +5,8 @@ format:
     html: 
        embed-resources: true
 editor: source
+editor_options: 
+  chunk_output_type: console
 ---
 
 This builds on the concepts from my [short course](https://github.com/brry/hour), look at that before this session!
@@ -13,14 +15,18 @@ This builds on the concepts from my [short course](https://github.com/brry/hour)
 
 Percentage of infants that are vaccinated per year and country. Data source: UNICEF Immunization coverage by antigen (country, regional, and global trends), see <https://data.unicef.org/resources/dataset/immunization/> and the [exact url](https://data.unicef.org/resources/data_explorer/unicef_f/?ag=UNICEF&df=GLOBAL_DATAFLOW&ver=1.0&dq=.IM_BCG+IMMUNISATION+IM_DTP1+IM_DTP3+IM_HEPB3+IM_HEPBB+IM_HIB3+IM_IPV1+IM_MCV1+IM_MCV2+IM_PCV3+IM_POL3+IM_RCV1+IM_ROTAC+IM_YFV..&startPeriod=2010&endPeriod=2020&lastnobservations=1)
 
+## packages
+
 ```{r, packages}
-if(!requireNamespace("berryFunctions")) install.packages("berryFunctions")
+if(!requireNamespace("pacman", quietly=TRUE)) install.packages("pacman")
+pacman::p_load("berryFunctions", "vioplot")
 ```
 
 
 ## read data
 
--   use the [zip file](vaccines.zip) containing txt files
+Provided as a [zip file](vaccines.zip) containing txt files
+
 -   conditionally (if not already done), unzip it to a folder with a good name
 ```{r, unzip_file}
 if(!dir.exists("vaccines")) unzip("vaccines.zip", exdir="vaccines")
@@ -29,66 +35,82 @@ if(!dir.exists("vaccines")) unzip("vaccines.zip", exdir="vaccines")
 -   using `lapply` (or the `purr` equivalent), read the files with actual data
 ```{r, read_data}
 filenames <- dir("vaccines", pattern="^vacc", full.names=TRUE)
+names(filenames) <- sub(".txt","",sub("vaccines/vacc_","",filenames), fixed=TRUE)
 vaccines <- lapply(filenames, read.table, header=TRUE, check.names=FALSE)
 ```
 
--   optionally, convert the list to an array (complicated, so code is provided:)
+## convert to array
 
+-   convert the list to an array (see lesson 4.4 in the [full R course](https://bookdown.org/brry/course/), including the [exercise](https://open.hpi.de/courses/hpi-dh-fprog2024/items/2XsXVA2obqW2U4pjlNVrV)):
 ```{r, data_to_array, eval=TRUE}
-countries <- read.delim("vaccines/countrycodes.txt")[,1] # iso3 countrycodes
+countries <- read.delim("vaccines/countrycodes.txt") # iso3 countrycodes
 arrayvacc <- lapply(vaccines, function(x) 
  {
  # dimensions must be expanded to include all countries in all datasets:
- y <- merge(x, data.frame(iso3=countries), all=TRUE)
+ y <- merge(x, data.frame(iso3=countries$iso3), all=TRUE)
  y$iso3 <- NULL
  y
  })
 arrayvacc <- berryFunctions::l2array(arrayvacc)
 names(dimnames(arrayvacc)) <- c("country", "year", "vaccine")
-dimnames(arrayvacc)[[1]] <- countries
-rm(countries)
-dimnames(arrayvacc)[[3]] <- sub(".txt", "", sub("vaccines/vacc_", "", filenames))
+dimnames(arrayvacc)[[1]] <- countries$iso3
 ```
 
 ## check data
 
--   Perform EDA (exploratory data analysis).
-```{r, eda, eval=FALSE}
-str(arrayvacc)
-hist(arrayvacc[,,"BCG"])
-hists <- sapply(dimnames(arrayvacc)[[3]], function(n)
-	hist(arrayvacc[,,n], main=n, breaks=seq(0,100,5)))
-```
+EDA (exploratory data analysis)
 
--   Across all vaccines and countries, how many datapoints are avialable per year?
-```{r, eda_ndatapoints}
-notNA <- sapply(dimnames(arrayvacc)[[2]], function(y)
-	sum(!is.na(arrayvacc[,y,])))
-plot(as.numeric(names(notNA)), notNA)
+-   Are the data values in a reasonable range?
+```{r, eda_hist, echo=-1, fig.height=2}
+par(mar=c(2,4,1,0.1), mgp=c(2,0.7,0), las=1)
+str(arrayvacc)
+hist(arrayvacc, col="tan3")
+```
+all values are 0-100 (percentage as per the metadata), higher percentages are more common
+
+-   Across all vaccines and countries, how many datapoints are available per year?
+```{r, eda_ndatapoints, echo=-1, fig.height=2}
+par(mar=c(2,4,0.1,0.1), mgp=c(2,0.7,0), las=1)
+notNA <- apply(arrayvacc, "year", function(v) sum(!is.na(v)) )
+notNA <- colSums(!apply(arrayvacc, "year", is.na)) # alternative code
+year <- as.numeric(names(notNA)) # will be used again below
+plot(year, notNA, type="o", col="blue")
 ```
 
 -   For the year with most datapoints, visualize the distributions for each vaccine (histograms in a multipanel plot). Which vaccine has the largest variation among countries?
-```{r}
+```{r, eda_dist_vaccines, eval=-1}
 View(arrayvacc[,"2022",])
-par(mfrow=c(4,4), mar=c(2,2,1.5,0.1))
-hists <- sapply(dimnames(arrayvacc)[[3]], function(v) hist(arrayvacc[,"2022",v], main=v, breaks=seq(0,100,5), col="salmon"))
+par(mfrow=c(4,4), mar=c(2.5,2,1,0.1), las=1)
+hists <- sapply(dimnames(arrayvacc)$vaccine, function(v) 
+	              hist(arrayvacc[,"2022",v], main=v, breaks=seq(0,100,5), col="salmon"))
 ```
+high variation: yellow fever -> not applicable in all countries
 
+-   For BCG, how does the distribution change over time?
+```{r, eda_dist_time, echo=-1, fig.height=3}
+par(mar=c(2,4,0.1,0.1), mgp=c(2,0.7,0), las=1)
+boxplot(arrayvacc[,,"BCG"], range=0, col="plum")
+```
 
 
 ## sanitize data
 
--   One dataset has an anomaly in the last year (2022).
-```{r, anomaly}
+-   As visible above, the BCG dataset has an anomaly in the last year (2022). 
+How can you look at the raw data interactively?
+```{r, anomaly1, eval=FALSE}
 View(arrayvacc[,,"BCG"])
+```
+sort ascencingly/decreasingly to get a feel for the extremes
+
+-   What country is affected and does that happen for several vaccines?
+```{r, anomaly2, eval=FALSE}
 View(arrayvacc["PRK",,])
 ```
 
--   What country is affected and does that happen for several vaccines?
 -   How could you fix the issue?
 
 Set PRK (North Korea) 2022 values that are zero to NA  
-set alle PRK 2022 to NA  
+set all PRK 2022 values to NA  
 ignore PRK completely (aggressive)
 
 ```{r, deal_with_PRK}
@@ -101,31 +123,74 @@ arrayvacc <- arrayvacc[-which(rownames(arrayvacc)=="PRK"),,]
 
 Visualize the temporal development of vaccinated infants for each vaccine. Consider how to display the individual countries:
 
--   show aggregate only
-```{r, vis_aggregate}
-plot(1980:2022, apply(arrayvacc, 2, mean, na.rm=TRUE), type="l", lwd=2, ylim=c(40,100), las=1)
-meanspervac <- apply(arrayvacc, 3, colMeans, na.rm=T)
-for(i in 1:14) lines(1980:2022, meanspervac[,i], col="grey")
+-   show aggregate + individual vaccines
+```{r, vis_aggregate, echo=-1, fig.height=3}
+par(mar=c(2,4,0.3,0.1), mgp=c(2,0.7,0), las=1)
+avg_year <- apply(arrayvacc, "year", mean, na.rm=TRUE)
+plot(year, avg_year, type="l", ylim=c(32,100), yaxs="i", xlim=c(1980,2025), lwd=3)
+avg_yearvac <- apply(arrayvacc, "vaccine", colMeans, na.rm=T)
+for(i in 1:14) lines(year, avg_yearvac[,i], col="grey")
+text(2022.5, avg_yearvac["2022",], colnames(avg_yearvac), col="grey", adj=0)
 ```
 
-
 -   spaghetti plot with each country as a line
--   boxplots
+```{r, vis_spaghetti, echo=-1, fig.height=3}
+par(mar=c(2,4,2,0.1), mgp=c(2,0.7,0), las=1)
+plot(year, arrayvacc[1,,"BCG"], ylim=range(arrayvacc[,,"BCG"],na.rm=TRUE), 
+     type="n", main="BCG")
+for(i in 1:nrow(arrayvacc)) lines(year, arrayvacc[i,,"BCG"], 
+                                  col=berryFunctions::addAlpha("red"))
+```
+
+-   violin plots
+```{r, vis_vioplots, echo=-1, fig.height=3}
+par(mar=c(2,4,1,0.1), mgp=c(2,0.7,0), las=1)
+vioplot::vioplot(arrayvacc[,,"BCG"], range=0, las=1, col="maroon", main="BCG")
+```
+(more granular than boxplots above)
+
 -   proportion of well-vaccinated countries
+```{r, vis_proportion, echo=-1, fig.height=3}
+par(mar=c(2,4,2.5,0.1), mgp=c(2,0.7,0), cex.main=1, las=1)
+plot(year, colMeans(arrayvacc[,,"BCG"]>80, na.rm=TRUE), type="l", lwd=3, 
+     col="forestgreen", ylab="",
+     main="proportion of countries with \n>80% of infants vaccinated against BCG")
+```
+Note: the 80% selection should be reasoned for, just choosing something here.
+
+- visualize into a pdf where you can scroll through the countries (use non-scrolling single-page view)
+```{r, vis_countries_pdf, results='hide'}
+pdf("vaccines_over_time.pdf")
+par(mar=c(2,3,2,0.2), las=1)
+rownames(countries) <- countries$iso3
+vcolors <- c(berryFunctions::catPal(), "black", "blue")
+# plot(1:14, pch=16, cex=3, col=vcolors)
+for(c in dimnames(arrayvacc)$country) # PRK removed, loop over this
+  {
+  plot(year, year, type="n", ylim=c(0,100), yaxs="i", xlim=c(1981, 2025), 
+       main=paste(c, "-", countries[c,"country"]))
+  for(v in 1:14) lines(year, arrayvacc[c,,v], col=vcolors[v])
+  text(2022.5, arrayvacc[c,"2022",], names(arrayvacc[c,"2022",]), col=vcolors, adj=0)
+  }
+dev.off()
+```
+
+```{r, vis_countries_pdf_open, eval=FALSE}
+berryFunctions::openFile("vaccines_over_time.pdf")
+```
+If wanted, you can also provide a shiny App with an interactive viewer of the raw data 
 
 ## pipeline
 
 -   How should you structure your code?
-codefile structuring as in that lesson
-unified approach
-think ahead
+
+codefiles: see the [2025-05-27: Coding Tips & Tricks](https://open.hpi.de/courses/hpi-dh-wearables2025/items/2ZzYqSKJovzhA3VS1pEor) lesson  
+unified approach  
+think ahead  
 use good software approaches / principles
 
--   Where can you deploy your code?
-github readme (from qmd)
-github.io
-shinyapps.io
+-   Where can you deploy your code results (for free)?
 
-
-
-
+github: readme generated from Qmd document as in [our git example](https://github.com/brry/weatherReport)  
+github.io: [map example](https://brry.github.io/sewekow/) with [R script](https://github.com/brry/sewekow/blob/main/karte.R) creating `index.html`  
+shinyapps.io: [example](https://brry.shinyapps.io/wetter/) with source code listed in-app  
