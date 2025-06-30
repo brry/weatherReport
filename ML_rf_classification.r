@@ -31,8 +31,8 @@ feature_data <- data.frame(t(feature_data)) # transpose
 rnames <- berryFunctions::l2df(strsplit(rownames(feature_data),".", fixed=TRUE))
 feature_data <- cbind(rnames, feature_data) ; rm(rnames)
 names(feature_data)[1:2] <- c("id", "condition") 
-View(feature_data) # n observations should be >> n columns in real life    !!!
 feature_data$condition <- as.factor(feature_data$condition)
+View(feature_data) # n observations should be >> n columns in real life    !!!
 
 # random forest ----
 
@@ -56,3 +56,6 @@ randomForest::varImpPlot(rf_model, main="Random Forest Feature Importance", n.va
 
 berryFunctions::linReg(m_q70~m_q60, data=feature_data)
 berryFunctions::linReg(x_q70~x_q60, data=feature_data) # our features are not good  !!!
+
+# Also, x,y,z is not in the same orientation for all participants.
+# Next up: SVM (with magnitude only)
