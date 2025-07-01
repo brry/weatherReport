@@ -20,7 +20,7 @@ get_stats <- function(matrix) {
  out <- c(out,
           dom_freq         = which.max(ff[-1])+1,
           spec_centroid    = sum((1:fn) * ff) / sum(ff),
-          low_freq_energy  = sum(ff[ 2:10]), # 1-10 Hz slow movements, postural adjustments
+          low_freq_energy  = sum(ff[ 2:10]), # 2-10 Hz slow movements, postural adjustments
           mid_freq_energy  = sum(ff[11:50]), # Fast movements, quick corrections, fine motor control
           high_freq_energy = sum(ff[51:100]),# Often noise, or very rapid oscillations
           energy           = sum(v^2)  )     # a signal processing feature
@@ -45,20 +45,20 @@ set.seed(123)
 train_indices <- sample(1:nrow(feature_data), nrow(feature_data)*0.7)
 train_data <- feature_data[train_indices, -1]
 test_data <- feature_data[-train_indices, -1]
-# Scale features for SVM:
+# Scale features for SVM (normalize):
 preProcValues <- caret::preProcess(train_data[, -1], method=c("center", "scale"))
 train_scaled <- predict(preProcValues, train_data)
 test_scaled <- predict(preProcValues, test_data)
 
 # Hyperparameter tuning for SVM:
 # Stage 1: Coarse grid search
-tune_coarse <- e1071::tune(svm, condition ~ ., 
+tune_coarse <- e1071::tune(e1071::svm, condition ~ ., 
                            data=train_scaled,
                            kernel="radial",
                            ranges=list(cost=10^(-2:4),
                                        gamma=10^(-5:2)))
 # Stage 2: Fine-tune around the best values
-tune_fine <- e1071::tune(svm, condition ~ ., 
+tune_fine <- e1071::tune(e1071::svm, condition ~ ., 
                          data=train_scaled,
                          kernel="radial",
                          ranges=list(
